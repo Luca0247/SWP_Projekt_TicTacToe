@@ -2,6 +2,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.ToDoubleBiFunction;
+
 import Models.*;
 import DB.*;
 
@@ -224,10 +226,11 @@ public class Home {
     public static void TicTacToe(){
         GameStatus gameStatus = GameStatus.SpielNochNichtFertig;
 
-        char player = 'x';
+        char player = 'x',  player2 = 'o';
         int row, column;
-        boolean again=false;
-
+        int rowP2, columnP2;
+        boolean again;
+        String inputPlayer2;
 
         feldBelegen();
 
@@ -244,7 +247,7 @@ public class Home {
                 // nur wenn das gewählte Feld frei ist wird es belegt
                 if (tictactoe[row][column] == '-') {
 
-                    transferInput();
+                    transferInput(row, column);
 
                     tictactoe[row][column] = player;
 
@@ -256,7 +259,6 @@ public class Home {
                     // es wird überprüft ob der player = 'x' ist,
                     // wenn true (?) wird zu 'o' gewechselt
                     // wenn false dann wir zu 'x' gewechselt (:)
-                    player = player == 'x' ? 'o' : 'x';
 
                 } else {
                     System.out.println("Das Feld war belegt. Bitte erneut eingeben");
@@ -264,9 +266,21 @@ public class Home {
                 }
             }while(again);
 
+            if(gameStatus != GameStatus.SpielNochNichtFertig){
+                break;
+            }
 
 
+            inputPlayer2 = readOtherPlayer();
 
+            String[] result = inputPlayer2.split(";");
+
+            rowP2 = Integer.parseInt(result[0]);
+            columnP2 = Integer.parseInt(result[1]);
+
+            tictactoe[rowP2][columnP2] = player2;
+
+            gameStatus = checkIfGameIsOver(player2);
 
         }while(gameStatus == GameStatus.SpielNochNichtFertig);
 
@@ -377,7 +391,13 @@ public class Home {
         }
     }
 
-    public static void transferInput(String row, String colum){
-        String input
+
+    // TODO: 08.04.2022 Netwerk hinzufügen! 
+    public static void transferInput(int row, int column){
+        String output = row + ";" + column;
+
+    }
+    public static String readOtherPlayer(){
+        return null;
     }
 }
