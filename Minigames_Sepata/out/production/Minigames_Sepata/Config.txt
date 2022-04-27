@@ -1,0 +1,3 @@
+ipHost="10.10.209.159";
+portServer=11000
+portThread=10000

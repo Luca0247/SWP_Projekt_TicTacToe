@@ -1,0 +1,2 @@
+portServer=11000
+portThread=10000

@@ -1,0 +1,7 @@
+[2022.04.22.15:43:39] Spiel: Tim vs Luca--> Winner:Tim
+[2022.04.22.15:44:21] Spiel: Tim vs Max--> Winner:Max
+[2022.04.22.15:44:33] Spiel: Luca vs Max--> Winner:Luca
+[2022.04.22.15:44:40] Spiel: Luca vs Tim--> Winner:Luca
+[2022.04.22.15:44:49] Spiel: Max vs Tim--> Winner:Tim
+[2022.04.22  15:46:13] Spiel: Tim vs Max--> Winner:Luca
+[2022.04.22 15:48:08] Spiel: Stanzi vs Tim--> Winner:Stanzi
