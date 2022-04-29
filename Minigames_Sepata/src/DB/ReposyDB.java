@@ -6,15 +6,15 @@ import java.sql.*;
 
 public class ReposyDB implements Reposy {
 
-    private String url = "jdbc:mysql://localhost:3307/zWaiGames";
+    private String url = "jdbc:mysql://localhost:3307/zWaiGamesDB";
     private String user = "root";
-    private String pwd = "Acul4002";
+    private String pwd = "nij765G7";
     private Connection _connection;
 
     public ReposyDB() throws ClassNotFoundException {
         Class<?> c = Class.forName("com.mysql.cj.jdbc.Driver");
         if(c != null){
-            // System.out.println("MySQL-Treiber wurde geladen!");
+             System.out.println("MySQL-Treiber wurde geladen!");
         }
     }
 

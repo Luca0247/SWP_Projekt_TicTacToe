@@ -40,7 +40,7 @@ public class ThreadsServer extends Thread {
 
     public void run() {
         String pathTS =  "C:/Users/timst_hsvelxb/Desktop/Projekt/Year 3/Intelij/Minigames_Sepata/src/Config.txt";
-        HashMap<String,String> hashTS = new HashMap<>();
+        HashMap<String,String> hashTS;
         hashTS = readSetup(pathTS);
         ServerSocket server;
         DataInputStream dis;

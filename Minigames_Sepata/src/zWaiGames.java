@@ -28,9 +28,9 @@ public class zWaiGames {
     public static void main(String[] args) throws IOException {
         String pathC =  "C:/Users/timst_hsvelxb/Desktop/Projekt/Year 3/Intelij/Minigames_Sepata/src/Config.txt";
         String pathA = "C:/Users/timst_hsvelxb/Desktop/Projekt/Year 3/Intelij/Minigames_Sepata/src/Anleitung.txt";
-        HashMap<String,String> hashC = new HashMap<>();
+        HashMap<String,String> hashC;
         hashC = readSetup(pathC);
-        char end;
+
 
         User u = new User();
         boolean login = true;
@@ -60,7 +60,7 @@ public class zWaiGames {
             }
         } while (!login);
 
-        do {
+
             String w = readFile(pathA);
             hashC.put("Erklärung", w);
             System.out.println("Wie funktioniert das Spiel:\n " + hashC.get("Erklärung"));
@@ -71,16 +71,20 @@ public class zWaiGames {
             if (choiceHost == 'h') {
                 AreUHot = true;
                 ServerSocket server = new ServerSocket(Integer.parseInt(hashC.get("portServer")));
+                System.out.println("SERVER gestartet");
+                System.out.println("Server-Port: " + server.getLocalPort());
+                System.out.println("Socket-Adresse: " + server.getLocalSocketAddress());
+                data = new Daten();
+                ThreadsServer ss = new ThreadsServer(data, false);
+                ss.start();
                 client = server.accept();
                 dos = new DataOutputStream(client.getOutputStream());
-                data = new Daten();
-                ThreadsServer s = new ThreadsServer(data, false);
-                s.start();
+
 
                 TicTacToe();
 
             } else if (choiceHost == 'c') {
-                Reposy db = null;
+                Reposy db;
                 String ip = null;
                 try {
                     do {
@@ -93,7 +97,6 @@ public class zWaiGames {
                 } catch (ClassNotFoundException | SQLException e) {
                     System.out.println("Hoho");
                 }
-
                 s = new Socket(ip, Integer.parseInt(hashC.get("portThread")));
                 dos = new DataOutputStream(s.getOutputStream());
                 data = new Daten();
@@ -106,9 +109,7 @@ public class zWaiGames {
                 System.out.println("Falscher Buchstabe!");
             }
 
-            System.out.println("Weiterspielen?");
-            end = reader.next().toLowerCase().charAt(0);
-        }while(end != 'e');
+
 
 
     }
@@ -507,7 +508,6 @@ public class zWaiGames {
 
         }
 
-
         dos.close();
         client.close();
         s.close();
@@ -526,9 +526,10 @@ public class zWaiGames {
 
     public static String readOtherPlayer(){
         String d;
+        String f = data.getData();
         do {
             d = data.getData();
-        }while(d.equals(d));
+        }while((d.equals(f)) && (d != null));
         return d;
     }
 

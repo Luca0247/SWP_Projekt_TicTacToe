@@ -40,10 +40,11 @@ public class ThreadsClient extends Thread {
 
     public void run() {
         String pathTC =  "C:/Users/timst_hsvelxb/Desktop/Projekt/Year 3/Intelij/Minigames_Sepata/src/Config.txt";
-        HashMap<String,String> hashTC = new HashMap<>();
+        HashMap<String,String> hashTC;
         hashTC = readSetup(pathTC);
         DataInputStream dis;
         Socket s;
+        System.out.println("Thread: Client verbunden");
         try {
            s = new Socket("localhost", Integer.parseInt(hashTC.get("portServer")));
             dis = new DataInputStream(s.getInputStream());
