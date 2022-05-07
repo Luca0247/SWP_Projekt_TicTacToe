@@ -6,9 +6,10 @@ create table user(
     username varchar(750) not null unique,
     password varchar(750) not null,
     IP varchar(500) not null
-    
 );
 
-#drop table user;
+
+drop table user;
+
 
 select * from user;

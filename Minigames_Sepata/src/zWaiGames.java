@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.Clock;
 import java.util.*;
 
 import Models.*;
@@ -20,26 +21,24 @@ public class zWaiGames {
     static DataOutputStream dos;
     static Socket client;
     static Socket s;
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_GREEN = "\u001B[32m";
     static char[][] tictactoe = new char[3][3];
+    static String oldReadValue=" ";
+    static Clock clock = Clock.systemDefaultZone();
+    static long milliSeconds=clock.millis();
 
     public static void main(String[] args) throws IOException {
-        String pathC =  "C:/Users/timst_hsvelxb/Desktop/Projekt/Year 3/Intelij/Minigames_Sepata/src/Config.txt";
-        String pathA = "C:/Users/timst_hsvelxb/Desktop/Projekt/Year 3/Intelij/Minigames_Sepata/src/Anleitung.txt";
-        HashMap<String,String> hashC;
-        hashC = readSetup(pathC);
+        String pathA = "C:/Users/lucas/Desktop/Minigames_Sepata/src/Anleitung.txt";
+        HashMap<String,String> hashC = null;
 
 
         User u = new User();
         boolean login = true;
         int choice;
         do {
-            System.out.printf("\n\n\n\n\n%50s\n", ANSI_RED +"Anmeldung/Regristration" + ANSI_RESET);
-            System.out.printf("%43s", "=========================\n");
+            System.out.printf("\n\n%50s\n", "Anmeldung/Regristration" );
+            System.out.printf("%52s",  "=========================\n" );
             do {
-                System.out.println("\n0 ... Anmeldung");
+                System.out.println("0 ... Anmeldung");
                 System.out.println("1 ... Regristration");
                 System.out.print("Ihre Wahl: ");
                 String input = reader.nextLine();
@@ -60,58 +59,107 @@ public class zWaiGames {
             }
         } while (!login);
 
+        fillUserIDs(u);
+        int hostPort = u.getUserId()+10000+1, threadPort = u.getUserId()+15000+1;
+        try{
+            Thread.sleep(2000);
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
+        System.out.println("\n\n\n\n\n\n\n\n\n===================================================================");
+        System.out.println("==============!!!Herzlich Willkommen bei TicTacToe!!!==============");
+        System.out.println("===================================================================\n");
+
+        System.out.println("Wissen sie wie TicTacToe funktioniert? [j/n]:");
+        while(reader.next().toLowerCase().charAt(0) == 'n') {
             String w = readFile(pathA);
             hashC.put("Erklärung", w);
-            System.out.println("Wie funktioniert das Spiel:\n " + hashC.get("Erklärung"));
+            System.out.println("\nSo funktioniert das Spiel:\n" + hashC.get("Erklärung"));
+            System.out.print("Ok? [j/n]: ");
+        }
 
-            System.out.println("Host oder Client: ");
-            char choiceHost = reader.next().toLowerCase().charAt(0);
-
-            if (choiceHost == 'h') {
-                AreUHot = true;
-                ServerSocket server = new ServerSocket(Integer.parseInt(hashC.get("portServer")));
-                System.out.println("SERVER gestartet");
-                System.out.println("Server-Port: " + server.getLocalPort());
-                System.out.println("Socket-Adresse: " + server.getLocalSocketAddress());
-                data = new Daten();
-                ThreadsServer ss = new ThreadsServer(data, false);
-                ss.start();
-                client = server.accept();
-                dos = new DataOutputStream(client.getOutputStream());
-
-
-                TicTacToe();
-
-            } else if (choiceHost == 'c') {
-                Reposy db;
-                String ip = null;
-                try {
-                    do {
-                        db = new ReposyDB();
-                        db.open();
-                        System.out.println("Spielpartner: ");
-                        String playpartner = reader.next();
-                        ip = db.getIP(playpartner);
-                    } while (ip == null);
-                } catch (ClassNotFoundException | SQLException e) {
-                    System.out.println("Hoho");
-                }
-                s = new Socket(ip, Integer.parseInt(hashC.get("portThread")));
-                dos = new DataOutputStream(s.getOutputStream());
-                data = new Daten();
-                ThreadsClient c = new ThreadsClient(data, false);
-                c.start();
-
-                TicTacToe();
-
-            } else {
-                System.out.println("Falscher Buchstabe!");
-            }
+        System.out.println("\n\n\n\nHost oder Client?");
+        System.out.println("==================");
+        System.out.println("Nun können sie auswählen, ob sie der Host oder der Client sind? [h/c]: ");
+        char choiceHost= reader.next().toLowerCase().charAt(0);
+        ServerSocket server = null;
+       try {
+           while ((choiceHost != 'h') && (choiceHost != 'c')) {
+               System.out.println("Sie haben leider ein falsches Zeichen eingegeben.");
+               System.out.println("\nHost oder Client?");
+               System.out.println("==================");
+               System.out.println("Nun können sie auswählen, ob sie der Host oder der Client sind? [h/c]: ");
+               choiceHost = reader.next().toLowerCase().charAt(0);
+           }
 
 
+           if (choiceHost == 'h') {
 
+               try {
+                   AreUHot = true;
+                   server = new ServerSocket(hostPort);
+                   System.out.println("SERVER gestartet");
+                   System.out.println("Server-Port: " + server.getLocalPort());
+                   System.out.println("Socket-Adresse: " + server.getLocalSocketAddress());
+                   data = new Daten();
+                   ThreadsServer ss = new ThreadsServer(data, false, threadPort);
+                   ss.start();
+                   client = server.accept();
+                   dos = new DataOutputStream(client.getOutputStream());
 
+               } catch (Exception e) {
+                   System.out.println("Fehler!");
+                   System.out.println(e.getMessage());
+               }
+           } else if (choiceHost == 'c') {
+               Reposy db;
+               String ip = null;
+               try {
+                   do {
+                       db = new ReposyDB();
+                       db.open();
+                       System.out.println("Spielpartner: ");
+                       String playpartner = reader.next();
+                       ip = db.getIP(playpartner);
+                       System.out.println(threadPort);
+                       System.out.println(hostPort);
+                   } while (ip == null);
+
+                   s = new Socket(ip, threadPort);
+                   dos = new DataOutputStream(s.getOutputStream());
+                   data = new Daten();
+                   ThreadsClient c = new ThreadsClient(data, false, ip, hostPort);
+                   c.start();
+               } catch (ClassNotFoundException | SQLException e) {
+                   System.out.println("Hoho");
+               }
+
+           } else {
+               System.out.println("False");
+           }
+
+           do {
+               TicTacToe();
+               System.out.println("Wollen sie noch eine weitere Runde spielen [j/n]: ");
+           } while (reader.next().toLowerCase().charAt(0) == 'j');
+       }
+       catch(Exception e){
+           System.out.println(e.getMessage());
+        }
+       finally{
+           dos.close();
+
+           if(choiceHost == 'h'){
+               client.close();
+               server.close();
+           }else{
+               s.close();
+           }
+       }
+
+        System.out.println("Sie haben das TicTacToe beendet. Kommen sie bald wieder.");
     }
 
     private static String readFile(String path){
@@ -150,7 +198,7 @@ public class zWaiGames {
         return null;
     }
     private static void writeLog(User p1, User p2, User winner){
-        Path path = Path.of("C:/Users/timst_hsvelxb/Desktop/Projekt/Year 3/Intelij/Minigames_Sepata/src/Log.txt");
+        Path path = Path.of("C:/Users/lucas/Desktop/SWP_Project/SWP_Projekt_TicTacToe/Minigames_Sepata/src/Log.txt");
 
 
         if(Files.exists(path)){
@@ -193,7 +241,7 @@ public class zWaiGames {
                         "Bitte versuchen sie es erneut.\n");
             }
         } catch (NumberFormatException e) {
-            System.out.println("Sie haben eine falsche Zahl/Zeichen eingegben.\n" +
+            System.out.println("Sie haben ein falsche Zeichen eingegeben.\n" +
                     "Bitte versuchen sie es erneut.\n");
             return -1;
         }
@@ -217,6 +265,7 @@ public class zWaiGames {
         }
         return -1;
     }
+
     public static boolean login (User u){
         Reposy rep = null;
         try {
@@ -327,18 +376,16 @@ public class zWaiGames {
         }
         return false;
     }
+
+
     public static void TicTacToe() throws IOException {
-        GameStatus gameStatus = GameStatus.SpielNochNichtFertig;
 
+
+        GameStatus gameStatus;
         char player = TTTconvertPLayerIcon();
-        char player2 = player == 'x' ? 'o' : 'x';
-        System.out.println(player2);
-
         boolean youPlay = AreUHot; // Ob du host bisch oda net???
 
-
         feldBelegen();
-
 
         do {
             if(youPlay) {
@@ -347,12 +394,14 @@ public class zWaiGames {
             }
             else {
                 gameStatus = OtherOnePlay(player == 'x' ? 'o' : 'x');
+                youPlay = true;
             }
         }while(gameStatus == GameStatus.SpielNochNichtFertig);
 
         tictactoeAnzeigen();
         showGameStatus(gameStatus);
     }
+
     public static char TTTconvertPLayerIcon(){
         char icon;
         do {
@@ -361,33 +410,44 @@ public class zWaiGames {
         }while((icon != 'x') && (icon != 'o'));
         return icon;
     }
+
     public static GameStatus YouPlay(char player) throws IOException {
-        boolean again;
+        boolean firstRun=true;
         int row, column;
         do {
-            again = false;
-            tictactoeAnzeigen();
+
 
             // Daten die man weitergeben muss!!!!
-            row = eingabe("Zeile [1-3]: ");
-            column = eingabe("Spalte [1-3]: ");
+            if(firstRun) {
+                System.out.println("Ihr Spielzug: ");
+                System.out.println("==============");
+            }
+            tictactoeAnzeigen();
+            System.out.printf("Setzen sie ihr Icon %c: \n", player);
+            row = eingabe("Zeile: ");
+            column = eingabe("Spalte: ");
+
+
 
 
             // nur wenn das gewählte Feld frei ist wird es belegt
             if (tictactoe[row][column] == '-') {
 
-                transferInput(row, column);
-
                 tictactoe[row][column] = player;
+                transferInput(row, column);
 
                 //überprüfen, ob das Spiel fertig ist
                 return checkIfGameIsOver(player);
 
-            } else {
-                System.out.println("Das Feld war belegt. Bitte erneut eingeben");
-                again=true;
             }
-        }while(again);
+            else {
+                System.out.println("Ihre Eingabe war nicht korrekt! \n" +
+                        "Sie können kein Feld belegen, das schon besetzt wurde." +
+                        "\nVersuchen sie es nocheinmal. ");
+                firstRun=false;
+            }
+        }while(tictactoe[row][column] != '-');
+        tictactoeAnzeigen();
         return GameStatus.SpielNochNichtFertig;
 
     }
@@ -398,6 +458,7 @@ public class zWaiGames {
 
         String[] result = inputPlayer2.split(";");
 
+
         row = Integer.parseInt(result[0]);
         column = Integer.parseInt(result[1]);
 
@@ -405,6 +466,7 @@ public class zWaiGames {
 
         return checkIfGameIsOver(player);
     }
+
     public static void feldBelegen(){
         // bei einem 2dim. Array benötigten wir mormalerweise 2 Schleifen
         // alle Zeilen durchlaufen
@@ -417,6 +479,7 @@ public class zWaiGames {
         }
     }
     public static void tictactoeAnzeigen(){
+        System.out.println("\n");
         for(int i = 0; i<3; i++) {
             for (int j = 0; j < 3; j++) {
                 System.out.printf("%5c", tictactoe[i][j]);
@@ -424,18 +487,20 @@ public class zWaiGames {
             System.out.println();
         }
     }
+
     public static int eingabe(String text){
         int value;
 
         do {
             System.out.print(text);
-            value = reader.nextInt();
+            value= checkIfInputIsRightInt(reader.next(), 3, 0);
         }while((value<1) || (value>3));
         // da Arrays immer bei 0 beginnen, müssen wir bei der Eingabe
         //      1 abziehen (der Benutzer gibt z.B. 1 ein ->
         //      wir benötigen dann 0)
         return value-1;
     }
+
     public static GameStatus checkIfGameIsOver(char player){
         GameStatus playerStatus = player == 'x' ? GameStatus.Spieler1HatGewonnen : GameStatus.Spieler2HatGewonnen;
         // 3 gleiche Zeichen in einer der 3 Zeilen
@@ -446,7 +511,7 @@ public class zWaiGames {
         }
         // 3 gleiche zeichen in einer der 3 Spalten
         for(int i=0; i<3;i++){
-            if( checkIfRowFull(i, player)) {
+            if( checkIfColumnFull(i, player)) {
                 return playerStatus;
             }
         }
@@ -475,7 +540,7 @@ public class zWaiGames {
     }
     public static boolean checkIfDiagFull(char player) {
         // Diag. von li. oben nach re. unten
-        if ((tictactoe[0][0] == player) && (tictactoe[1][1] == player) && (tictactoe[3][3] == player)){
+        if ((tictactoe[0][0] == player) && (tictactoe[1][1] == player) && (tictactoe[2][2] == player)){
             return true;
         }
         // diag. von re. oben nach li. unten
@@ -505,34 +570,63 @@ public class zWaiGames {
         }
         else if (gameStatus == GameStatus.KeinerHatGewonnen){
             System.out.println("Keiner hat gewonnen!");
-
         }
-
-        dos.close();
-        client.close();
-        s.close();
-
-
     }
+
     public static void transferInput(int row, int column) throws IOException {
         String output = row + ";" + column;
-            TTTWrite(output);
+        TTTWrite(output);
 
     }
     public static void TTTWrite(String output) throws IOException {
         dos.writeUTF(output);
         dos.flush();
     }
-
     public static String readOtherPlayer(){
         String d;
-        String f = data.getData();
+        int points=0;
+        boolean setPoints=true;
+
+
+
+        System.out.print("Waiting for the other Player");
         do {
             d = data.getData();
-        }while((d.equals(f)) && (d != null));
+
+            if (clock.millis() - milliSeconds > 500) {
+                if (setPoints) {
+                    System.out.print(".");
+                    points++;
+                    if(points % 3 == 0){
+                        setPoints=false;
+                    }
+                }
+                else {
+                    System.out.print("\b\b\b");
+                    setPoints=true;
+                }
+                milliSeconds = clock.millis();
+            }
+            System.out.print(" \b");
+        }while((d.equals(oldReadValue)) || (Objects.equals(d, " ")));
+        oldReadValue = d;
         return d;
     }
 
+    public static void fillUserIDs(User u) {
+        Reposy rep = null;
+        try {
+            rep = new ReposyDB();
+            rep.open();
+            u.setUserId(rep.getIdByUsername(u.getUsername()));
+        }
 
+        catch (ClassNotFoundException e) {
+            // System.out.println("MySQL-Treiber konnte nicht geladen werden!");
 
+        }
+        catch (SQLException e) {
+            //System.out.println("Datenbankfehler!");
+        }
+    }
 }

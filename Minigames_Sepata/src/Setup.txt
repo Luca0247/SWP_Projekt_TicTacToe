@@ -1,4 +1,4 @@
-url="jdbc:mysql://localhost:3307/"
-user="root"
-pwd="nij765G7" 
-db="zWaiGames"
+url=jdbc:mysql://localhost:3307/
+user=root
+pwd=Acul4002
+db=zWaiGamesDB

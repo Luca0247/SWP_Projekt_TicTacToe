@@ -4,7 +4,7 @@ import Models.*;
 import java.sql.SQLException;
 import java.util.List;
 
-public interface Reposy {
+public interface VIPReposy {
 
     void open() throws SQLException;
     void close() throws SQLException;
@@ -22,4 +22,8 @@ public interface Reposy {
     boolean insertFriends(User user) throws SQLException;
 
     int getIdByUsername(String name) throws SQLException;
+
+    void updateScore(String name, int score) throws SQLException;
+
+    int getScore(String name) throws SQLException;
 }

@@ -14,6 +14,7 @@ public class ThreadsServer extends Thread {
 
     private Daten _dataThread;
     private boolean _finished;
+    private int _port;
 
     //getter/setter
     public Daten getDataThread(){
@@ -30,25 +31,31 @@ public class ThreadsServer extends Thread {
         this._finished = finished;
     }
 
+    public int getPort(){
+        return this._port;
+    }
+    public void setPort(int port){
+        this._port=port;
+    }
+
     //ctors
-    public ThreadsServer(){this(null, false);}
-    public ThreadsServer(Daten dataThread, boolean finished){
+    public ThreadsServer(){this(null, false, 0);}
+    public ThreadsServer(Daten dataThread, boolean finished, int port){
         this.setDataThread(dataThread);
         this.setFinished(finished);
+        this.setPort(port);
     }
 
 
     public void run() {
-        String pathTS =  "C:/Users/timst_hsvelxb/Desktop/Projekt/Year 3/Intelij/Minigames_Sepata/src/Config.txt";
-        HashMap<String,String> hashTS;
-        hashTS = readSetup(pathTS);
         ServerSocket server;
         DataInputStream dis;
         Socket client;
         try {
-            server = new ServerSocket(Integer.parseInt(hashTS.get("portThread")));
+            server = new ServerSocket(getPort());
             client = server.accept();
-             dis = new DataInputStream(client.getInputStream());
+            dis = new DataInputStream(client.getInputStream());
+            System.out.printf("Thread: Port: %d", getPort());
 
         } catch (IOException e) {
             System.out.println("Es trat ein Fehler beim Verbinden auf! Error: ThreadsServer");
@@ -58,15 +65,11 @@ public class ThreadsServer extends Thread {
         }
         do {
             try {
-
                 String u = dis.readUTF();
 
                 if (u.length() > 0) {
                     this._dataThread.setData(u);
                 }
-
-
-
             } catch (IOException e) {
                 System.out.println("Es trat ein Fehler beim Lesen auf!");
                 System.out.println(e.getMessage());
@@ -80,24 +83,5 @@ public class ThreadsServer extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-    private static HashMap<String, String> readSetup(String p){
-        Path path = Path.of(p);
-        HashMap<String,String> hoho = new HashMap<>();
-        if(Files.exists(path)){
-            try{
-                List<String> daten = Files.readAllLines(path);
-                for(String d : daten){
-                    String[] value = d.split("=");
-                    hoho.put(value[0], value[1]);
-                }
-                return hoho;
-            }catch(IOException e){
-                System.out.println("Error accured");
-            }
-        }else{
-            System.out.println("Error 404");
-        }
-        return null;
     }
 }

@@ -1,2 +1,2 @@
-portServer=11000
-portThread=10000
+portServer=10000
+portThread=11000

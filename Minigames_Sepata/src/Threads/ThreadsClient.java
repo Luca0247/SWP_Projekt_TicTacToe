@@ -10,11 +10,14 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import DB.*;
 
 public class ThreadsClient extends Thread {
 
     private Daten _dataClient;
     private boolean _finished;
+    private String _ip;
+    private int _port;
 
     //getter/setter
     public Daten getDataThread(){
@@ -31,22 +34,35 @@ public class ThreadsClient extends Thread {
         this._finished = finished;
     }
 
+    public String getIPC(){
+        return this._ip;
+    }
+
+    public void setIPC(String ip){
+        this._ip=ip;
+    }
+    public int getPort(){
+        return this._port;
+    }
+    public void setPort(int port){
+        this._port=port;
+    }
+
     //ctors
-    public ThreadsClient(){this(null, false);}
-    public ThreadsClient(Daten dataClient, boolean finished){
+    public ThreadsClient(){this(null, false, " ", 0);}
+    public ThreadsClient(Daten dataClient, boolean finished, String ipc, int port){
         this.setDataThread(dataClient);
         this.setFinished(finished);
+        this.setIPC(ipc);
+        this.setPort(port);
     }
 
     public void run() {
-        String pathTC =  "C:/Users/timst_hsvelxb/Desktop/Projekt/Year 3/Intelij/Minigames_Sepata/src/Config.txt";
-        HashMap<String,String> hashTC;
-        hashTC = readSetup(pathTC);
         DataInputStream dis;
         Socket s;
         System.out.println("Thread: Client verbunden");
         try {
-           s = new Socket("localhost", Integer.parseInt(hashTC.get("portServer")));
+            s = new Socket(_ip, getPort());
             dis = new DataInputStream(s.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
@@ -77,24 +93,4 @@ public class ThreadsClient extends Thread {
             e.printStackTrace();
         }
     }
-    private static HashMap<String, String> readSetup(String p){
-        Path path = Path.of(p);
-        HashMap<String,String> hoho = new HashMap<>();
-        if(Files.exists(path)){
-            try{
-                List<String> daten = Files.readAllLines(path);
-                for(String d : daten){
-                    String[] value = d.split("=");
-                    hoho.put(value[0], value[1]);
-                }
-                return hoho;
-            }catch(IOException e){
-                System.out.println("Error accured");
-            }
-        }else{
-            System.out.println("Error 404");
-        }
-        return null;
-    }
 }
-

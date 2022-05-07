@@ -8,6 +8,8 @@ public class User {
     private String _IP;
 
 
+
+
     public int getUserId() {
         return _userId;
     }
@@ -33,6 +35,9 @@ public class User {
         this._IP=IP;
     }
 
+
+
+
     public User(){
         this(0,"","", "");
     }
@@ -45,6 +50,6 @@ public class User {
 
     @Override
     public String toString(){
-        return this.getUserId() + " " + this.getUsername() + " " + this.getPassword() + " " + this.getPassword() + "\n";
+        return this.getUserId() + " " + this.getUsername() + " " + this.getPassword() + " " + this.getIP() + "\n";
     }
 }
